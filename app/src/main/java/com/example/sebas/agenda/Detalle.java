@@ -11,6 +11,7 @@ public class Detalle extends AppCompatActivity {
     private Contacto c;
     private EditText etTelefono;
     private EditText etNombre;
+    private Contacto contactoEditado;
 
 
     @Override
@@ -20,6 +21,7 @@ public class Detalle extends AppCompatActivity {
 
         Bundle extras = getIntent().getExtras();
         c = extras.getParcelable("contacto");
+
         etNombre = findViewById(R.id.etNombre);
         etTelefono = findViewById(R.id.etTelefono);
         Button btEdit = findViewById(R.id.btEditar);
@@ -32,12 +34,12 @@ public class Detalle extends AppCompatActivity {
         btEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                c.setNombre(etNombre.getText().toString());
-                c.setTelefono(etTelefono.getText().toString());
-
-
+                contactoEditado = new Contacto(c.getId(), etNombre.getText().toString(), etTelefono.getText().toString(), 0);
+                if (c != contactoEditado) {
+                    contactoEditado.setEditable(1);
+                }
                 Intent i = getIntent();
-                i.putExtra("nuevoContacto", c);
+                i.putExtra("nuevoContacto", contactoEditado);
                 setResult(RESULT_OK, i);
                 finish();
 

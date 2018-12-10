@@ -37,11 +37,18 @@ public class Agenda extends AppCompatActivity {
         String rest = accion.getStringExtra("reestablecer");
 
         if (rest != null){
-            crearArchivo(memoria);
+            agenda = leerArchivo();
+            if (!existeArchivo(this)){
+                crearArchivo(memoria, null);
+            }else{
+                agenda = leerArchivo();
+                crearArchivo(memoria, agenda);
+            }
+
         }
 
         if (!existeArchivo(this)){
-            crearArchivo(memoria);
+            crearArchivo(memoria, null);
         }
         agenda = leerArchivo();
 
@@ -90,7 +97,7 @@ public class Agenda extends AppCompatActivity {
         return escritor;
     }
 
-    public void crearArchivo(String memoria){
+    public void crearArchivo(String memoria, List<Contacto> agenda){
         //Creamos el archivo segun nos indiquen
         OutputStreamWriter escritor = null;
         if (memoria.equals("interna")){
@@ -112,6 +119,12 @@ public class Agenda extends AppCompatActivity {
                 sortOrder);
         //Creamos la cadena que compondrá nuestro arhcivo
         String cadena ="";
+        if (agenda!=null){
+            for (Contacto contacto: agenda) {
+                if (contacto.getEditable() > 0)
+                    cadena += contacto.getId() + ";" + contacto.getNombre() + ";" + contacto.getTelefono() + ";" + contacto.getEditable() + ";\n";
+            }
+        }
         while(c.moveToNext()){
             cadena += c.getString(0) + ";" + c.getString(1) + ";" + c.getString(2)+";\n";
         }
@@ -134,9 +147,14 @@ public class Agenda extends AppCompatActivity {
             flujo= new InputStreamReader(openFileInput("contacto.txt"));
             lector= new BufferedReader(flujo);
             String texto = lector.readLine();
+            Contacto c;
             while(texto!=null) {
                 String[] contacto = texto.split(";");
-                Contacto c = new Contacto(contacto[0], contacto[1], contacto[2]);
+                if (contacto.length>3){
+                    c = new Contacto(contacto[0], contacto[1], contacto[2], Integer.parseInt(contacto[3]));
+                }else {
+                     c = new Contacto(contacto[0], contacto[1], contacto[2], 0);
+                }
                 contactos.add(c);
                 texto=lector.readLine();
             }
@@ -150,7 +168,7 @@ public class Agenda extends AppCompatActivity {
         OutputStreamWriter escritor = crearArchivoMemoriaInterna();
         String cadena = "";
         for (Contacto c: contactos) {
-            cadena += c.getId() + ";" + c.getNombre() + ";" + c.getTelefono()+";\n";
+            cadena += c.getId() + ";" + c.getNombre() + ";" + c.getTelefono()+";"+ c.getEditable() +"\n";
         }
         try {
             escritor.write(cadena);
